@@ -1,8 +1,10 @@
 # Zombie Cafe Revival: offline APKs
 
-Both APKs are built from `claude/zombie-cafe-offline-xro7e6` at commit `e421908`.
+Both APKs are built from `claude/zombie-cafe-offline-xro7e6` at commit `5916824`.
 They run fully offline: there is no backend, rival cafes are generated on the
-device, and toxin purchases complete locally.
+device, and toxin purchases complete locally. They also run full screen: the
+status and navigation bars stay hidden, and a swipe in from the edge shows them
+for a moment.
 
 | APK | For |
 | --- | --- |
@@ -12,9 +14,9 @@ device, and toxin purchases complete locally.
 Direct downloads, which you can open on the phone:
 
 - https://github.com/0StevenH0/zombie-cafe-revival/raw/apk-builds/ZombieCafeOffline-arm64.apk
-  (SHA-256 `2b161d891abc5fb19405216dca17ac06df8c144d99870151bf5b520526c9457d`)
+  (SHA-256 `f49b5521e4884d90ab91e84377731af6b4a2fa0f1608a1d7758ab87e81f6dedc`)
 - https://github.com/0StevenH0/zombie-cafe-revival/raw/apk-builds/ZombieCafeOffline.apk
-  (SHA-256 `52364448e046a35787473715412a13f150b0666ed5d433f6827a336a1b7befb1`)
+  (SHA-256 `816a27d69e1319c716f8935657ea405df89068ed67340cfb235e2f93ed19bdd6`)
 
 ## Which one?
 
