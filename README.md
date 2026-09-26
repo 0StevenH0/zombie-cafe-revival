@@ -11,7 +11,7 @@ Offline builds of the original game, which need no server, account or network ([
 - **[ZombieCafeOffline-arm64.apk](https://github.com/0StevenH0/zombie-cafe-revival/raw/apk-builds/ZombieCafeOffline-arm64.apk)**: for phones that cannot run 32-bit apps (Pixel 7 and later, POCO X7 Pro, most phones from 2024 on) and for Android 14 and 15. It runs the original engine on a built-in ARM32 emulator ([64-bit-only phones](#64-bit-only-phones)). New and not yet tested on a phone.
 - **[ZombieCafeOffline.apk](https://github.com/0StevenH0/zombie-cafe-revival/raw/apk-builds/ZombieCafeOffline.apk)**: the engine running natively, for phones that can still run 32-bit apps. Android 14 and later refuse to install it from the phone; use `adb install --bypass-low-target-sdk-block ZombieCafeOffline.apk`.
 
-Both use the same package name and signing key, so installing one over the other keeps your save. Checksums and install notes are on the [`apk-builds`](https://github.com/0StevenH0/zombie-cafe-revival/tree/apk-builds) branch.
+The game runs full screen on Android 4.4 and later: the status and navigation bars stay hidden, and a swipe in from the edge of the screen shows them for a moment. Both use the same package name and signing key, so installing one over the other keeps your save. Checksums and install notes are on the [`apk-builds`](https://github.com/0StevenH0/zombie-cafe-revival/tree/apk-builds) branch.
 
 ## Heritage
 

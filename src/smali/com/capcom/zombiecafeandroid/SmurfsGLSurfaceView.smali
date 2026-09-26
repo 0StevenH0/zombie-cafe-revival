@@ -70,17 +70,14 @@
     return-void
 
     :cond_0
-    sget-object v0, Lcom/capcom/zombiecafeandroid/ZombieCafeAndroid;->mDisplay:Landroid/view/Display;
-
-    invoke-virtual {v0}, Landroid/view/Display;->getWidth()I
+    # Immersive mode: the whole window, not the display minus the navigation bar.
+    invoke-static {p1}, Lcom/capcom/zombiecafeandroid/offline/Immersive;->width(Landroid/app/Activity;)I
 
     move-result v0
 
     sput v0, Lcom/capcom/zombiecafeandroid/ZombieCafeAndroid;->mScreenWidth:I
 
-    sget-object v0, Lcom/capcom/zombiecafeandroid/ZombieCafeAndroid;->mDisplay:Landroid/view/Display;
-
-    invoke-virtual {v0}, Landroid/view/Display;->getHeight()I
+    invoke-static {p1}, Lcom/capcom/zombiecafeandroid/offline/Immersive;->height(Landroid/app/Activity;)I
 
     move-result v0
 

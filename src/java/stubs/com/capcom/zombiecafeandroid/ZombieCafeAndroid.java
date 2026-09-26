@@ -6,6 +6,9 @@ public class ZombieCafeAndroid extends android.app.Activity {
     public static boolean mLoggedIn;
     public static boolean mAllowLogin;
     public static int purchaseSlot;
+    public static android.opengl.GLSurfaceView mGLView;
+    public static int mScreenWidth;
+    public static int mScreenHeight;
 
     public static void boughtToxin(String productId) {
     }

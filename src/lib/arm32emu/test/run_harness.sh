@@ -8,7 +8,8 @@
 # (tool jars) and `go run ./tool/build_tool -i src/ -o build/` (assets).
 #
 # Environment knobs:
-#   ZC_HARNESS_TAPS=frame:x:y,...  scripted touches (1200x540 screen), e.g.
+#   ZC_HARNESS_SIZE=WxH            screen size in game units (default 1200x540)
+#   ZC_HARNESS_TAPS=frame:x:y,...  scripted touches in screen coordinates, e.g. at 1200x540
 #                                  620:935:428,760:160:210,820:930:442 = PLAY, pick a chef, select
 #   ZC_HARNESS_UI_THREAD=1         touches and sensor calls from a second thread, like the phone
 #   ZC_HARNESS_REALTIME=1          pace frames at 30 fps

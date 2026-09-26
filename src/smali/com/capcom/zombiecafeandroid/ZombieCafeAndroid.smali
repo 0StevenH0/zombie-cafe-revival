@@ -3666,7 +3666,8 @@
 
     sput-object v0, Lcom/capcom/zombiecafeandroid/ZombieCafeAndroid;->mAlert:Landroid/app/AlertDialog;
 
-    invoke-virtual {v0}, Landroid/app/AlertDialog;->show()V
+    # Immersive mode: show the dialog without bringing the system bars back.
+    invoke-static {v0}, Lcom/capcom/zombiecafeandroid/offline/Immersive;->show(Landroid/app/Dialog;)V
 
     return-void
 
@@ -4845,11 +4846,23 @@
 
     invoke-virtual {v0, v5, v5}, Landroid/view/Window;->setFlags(II)V
 
+    # Immersive mode: hide the system bars before the window is first laid out,
+    # and let the GL view fill the whole window (offline/Immersive).
+    invoke-static {p0}, Lcom/capcom/zombiecafeandroid/offline/Immersive;->apply(Landroid/app/Activity;)V
+
     new-instance v0, Landroid/widget/RelativeLayout$LayoutParams;
 
     sget v1, Lcom/capcom/zombiecafeandroid/ZombieCafeAndroid;->mScreenWidth:I
 
+    invoke-static {v1}, Lcom/capcom/zombiecafeandroid/offline/Immersive;->viewSize(I)I
+
+    move-result v1
+
     sget v2, Lcom/capcom/zombiecafeandroid/ZombieCafeAndroid;->mScreenHeight:I
+
+    invoke-static {v2}, Lcom/capcom/zombiecafeandroid/offline/Immersive;->viewSize(I)I
+
+    move-result v2
 
     invoke-direct {v0, v1, v2}, Landroid/widget/RelativeLayout$LayoutParams;-><init>(II)V
 
@@ -5159,6 +5172,8 @@
     invoke-static {v0, v1}, Landroid/util/Log;->d(Ljava/lang/String;Ljava/lang/String;)I
 
     invoke-super {p0}, Landroid/app/Activity;->onResume()V
+
+    invoke-static {p0}, Lcom/capcom/zombiecafeandroid/offline/Immersive;->apply(Landroid/app/Activity;)V
 
     new-instance v0, Landroid/content/IntentFilter;
 
@@ -5558,7 +5573,8 @@
 
     move-result-object v1
 
-    invoke-virtual {v1}, Landroid/view/Display;->getWidth()I
+    # Immersive mode: the whole window, not the display minus the navigation bar.
+    invoke-static {p0}, Lcom/capcom/zombiecafeandroid/offline/Immersive;->width(Landroid/app/Activity;)I
 
     move-result v2
 
@@ -5841,7 +5857,7 @@
     return-void
 
     :cond_6
-    invoke-virtual {v1}, Landroid/view/Display;->getHeight()I
+    invoke-static {p0}, Lcom/capcom/zombiecafeandroid/offline/Immersive;->height(Landroid/app/Activity;)I
 
     move-result v1
 
@@ -5904,6 +5920,21 @@
     :cond_0
     invoke-static {}, Lcom/capcom/zombiecafeandroid/ZombieCafeAndroid;->StartNotifications()V
 
+    return-void
+.end method
+
+.method public onWindowFocusChanged(Z)V
+    .locals 0
+
+    invoke-super {p0, p1}, Landroid/app/Activity;->onWindowFocusChanged(Z)V
+
+    # Immersive mode: dialogs, the notification shade and app switches bring
+    # the system bars back; hide them again when the game has focus.
+    if-eqz p1, :cond_0
+
+    invoke-static {p0}, Lcom/capcom/zombiecafeandroid/offline/Immersive;->apply(Landroid/app/Activity;)V
+
+    :cond_0
     return-void
 .end method
 

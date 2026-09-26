@@ -36,6 +36,12 @@ public class Harness {
         com.capcom.zombiecafeandroid.offline.HarnessServer.init(CC_Android.files, CC_Android.assets);
 
         int w = 1200, h = 540;
+        String size = System.getenv("ZC_HARNESS_SIZE"); /* "WxH" in game units */
+        if (size != null) {
+            String[] wh = size.split("x");
+            w = Integer.parseInt(wh[0]);
+            h = Integer.parseInt(wh[1]);
+        }
         long t0 = System.nanoTime();
         System.load(lib);
         long t1 = System.nanoTime();

@@ -326,6 +326,35 @@
 .method public onSurfaceCreated(Ljavax/microedition/khronos/opengles/GL10;Ljavax/microedition/khronos/egl/EGLConfig;)V
     .locals 7
 
+    # Immersive mode: size the game to the surface it is about to draw on, not
+    # to the display minus the navigation bar (offline/Immersive).
+    invoke-static {}, Lcom/capcom/zombiecafeandroid/offline/Immersive;->readSurfaceSize()Z
+
+    move-result v0
+
+    if-eqz v0, :immersive_sized
+
+    invoke-static {}, Lcom/capcom/zombiecafeandroid/offline/Immersive;->surfaceWidth()I
+
+    move-result v0
+
+    sput v0, Lcom/capcom/zombiecafeandroid/CapcomRenderer;->c:I
+
+    invoke-static {}, Lcom/capcom/zombiecafeandroid/offline/Immersive;->surfaceHeight()I
+
+    move-result v0
+
+    sput v0, Lcom/capcom/zombiecafeandroid/CapcomRenderer;->d:I
+
+    invoke-static {}, Lcom/capcom/zombiecafeandroid/offline/Immersive;->surfaceScale()F
+
+    move-result v0
+
+    sput v0, Lcom/capcom/zombiecafeandroid/CapcomRenderer;->scaleX:F
+
+    sput v0, Lcom/capcom/zombiecafeandroid/CapcomRenderer;->scaleY:F
+
+    :immersive_sized
     sput-object p1, Lcom/capcom/zombiecafeandroid/CapcomRenderer;->glObj:Ljavax/microedition/khronos/opengles/GL10;
 
     const/16 v0, 0x302
