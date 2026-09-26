@@ -25,8 +25,9 @@
 .method public final run()V
     .locals 4
 
-    invoke-static {}, Landroid/os/Looper;->prepare()V
-
+    # Offline mode: ExecuteFacebook is synchronous now, so the worker no longer
+    # parks in Looper.loop() waiting for SDK callbacks (one leaked thread per
+    # Facebook action before).
     iget-object v0, p0, Lcom/capcom/zombiecafeandroid/d;->a:Lcom/capcom/zombiecafeandroid/CapcomFacebook;
 
     iget-object v1, p0, Lcom/capcom/zombiecafeandroid/d;->a:Lcom/capcom/zombiecafeandroid/CapcomFacebook;
@@ -48,8 +49,6 @@
     move-result-object v3
 
     invoke-virtual {v0, v1, v2, v3}, Lcom/capcom/zombiecafeandroid/CapcomFacebook;->ExecuteFacebook(ILjava/lang/String;Ljava/lang/String;)V
-
-    invoke-static {}, Landroid/os/Looper;->loop()V
 
     return-void
 .end method
