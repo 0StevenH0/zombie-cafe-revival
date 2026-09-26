@@ -188,6 +188,8 @@ A `git show HEAD~1:src/smali/com/capcom/billing/SmurfsBilling.smali` (after this
 
 ### Open question: HUD toxin icon does not open any store page
 
+> **Resolved 2026-09-26** ([offline mode spec](2026-09-26-offline-mode-design.md)). The handler is indeed native, but it was never gated: `ZombieCafeExtension.cpp` itself NOPed `base + 0x9dee8`, which is the `bl BuyToxinDialog::show()` in the `BUTTON_ADDTOXIN` branch of `GameStateCafe::onHudButtonPress` (the line came in with the original import, uncommented). With that NOP removed the icon opens the same `BuyToxinDialog` as the low-toxin slot picker, once tutorial step 22 is complete (before that it shows a notice instead). The investigation below is kept as it was written.
+
 Separate from the low-toxin slot-picker flow that this spec fixes, the legacy APK has a "toxin" icon in the in-game HUD that, when tapped, plays a click sound effect but does not open any purchase UI. The user's expectation was that this icon should open a full "store" page with both cash and toxin purchase options.
 
 This session investigated the HUD path thoroughly and reached a **definitive negative result**: the handler is pure native code with zero JNI calls out to Java, so Java/smali patching cannot fix it. The evidence:

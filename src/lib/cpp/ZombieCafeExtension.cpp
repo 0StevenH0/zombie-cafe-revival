@@ -21,21 +21,51 @@ JNIEXPORT jint JNICALL JNI_OnLoad(JavaVM* vm, void* reserved) {
   const char* infoStr = "ZCR - %s\0";
   Memory::memcpyProtected((void*)(base + 0x1a14dc), infoStr, strlen(infoStr) + 1);
 
+  /*
+    Offline mode: there is no backend. Every CCUrlConnection::NewRequest is
+    answered in-process (smali: URLManager.a -> OfflineBridge ->
+    offline/OfflineServer), which matches endpoints by path and ignores the
+    host. The base URLs point at loopback only as a backstop, so anything that
+    ever slipped past URLManager would fail on-device instead of reaching a
+    remote server.
+  */
                           //http://zombiecafe.capcomcanada.com/updater/%s
-  const char* updaterUrl = "https://zc.airyz.xyz/v1/updater/%s\0";
+  const char* updaterUrl = "http://127.0.0.1/v1/updater/%s\0";
   Memory::memcpyProtected((void*)(base + 0x1a6610), updaterUrl, strlen(updaterUrl) + 1);
 
                     //http://zombiecafe.capcomcanada.com/x
-  const char* xUrl = "https://zc.airyz.xyz/v1/x\0";
+  const char* xUrl = "http://127.0.0.1/v1/x\0";
   Memory::memcpyProtected((void*)(base + 0x1a839c), xUrl, strlen(xUrl) + 1);
 
+                      //http://zombiecafe.capcomcanada.com/zcw  (CCServer base on Amazon devices)
+  const char* zcwUrl = "http://127.0.0.1/v1/zcw\0";
+  Memory::memcpyProtected((void*)(base + 0x1a83c4), zcwUrl, strlen(zcwUrl) + 1);
+
                       //http://zombiecafe.capcomcanada.com/zca
-  const char* zcaUrl = "https://zc.airyz.xyz/v1/zca\0";
+  const char* zcaUrl = "http://127.0.0.1/v1/zca\0";
   Memory::memcpyProtected((void*)(base + 0x1a842c), zcaUrl, strlen(zcaUrl) + 1);
 
+  /*
+    The HUD toxin icon. The original import NOPed +0x9dee8, which is the
+    `bl BuyToxinDialog::show()` in the BUTTON_ADDTOXIN branch of
+    GameStateCafe::onHudButtonPress - that NOP is why the icon only played a
+    click. Purchases now complete locally (SmurfsBilling ->
+    offline/OfflineStore), so the store opens again from the HUD, the same
+    BuyToxinDialog the low-toxin slot picker uses. To hide it again, restore:
+      Memory::setNop((void*)(base + 0x9dee8), 4);
+  */
 
-  Memory::setNop((void*)(base + 0x9dee8), 4);
-  
+  /*
+    ZombieCafe::isPurchaseTooFrequent() (+0x121f20) makes BuyToxinDialog turn
+    a purchase into a "frequent purchase" notice once
+    Constants::ZombieCafe_FREQUENT_PURCHASE_LIMIT purchases land within
+    FREQUENT_PURCHASE_DURATION. Purchases are free and local now, so it always
+    answers false: the prologue `push {r4-r6, lr}; sub sp, #8` (70 b5 82 b0)
+    becomes `movs r0, #0; bx lr`.
+  */
+  static const unsigned char returnFalse[] = {0x00, 0x20, 0x70, 0x47};
+  Memory::memcpyProtected((void*)(base + 0x121f20), returnFalse, sizeof(returnFalse));
+
   //Nop delete texture (this will cause memory leak, fix this!!!)
   Memory::setNop((void*)(base + 0x13d530), 4);
   Memory::setNop((void*)(base + 0x13d550), 4);

@@ -4779,9 +4779,9 @@
 
     invoke-virtual {v0, v1}, Lcom/chartboost/sdk/ChartBoost;->setAppSignature(Ljava/lang/String;)V
 
-    sget-object v0, Lcom/capcom/zombiecafeandroid/ZombieCafeAndroid;->_cb:Lcom/chartboost/sdk/ChartBoost;
-
-    invoke-virtual {v0}, Lcom/chartboost/sdk/ChartBoost;->install()V
+    # Offline mode: ChartBoost.install() phoned home to the (long dead) ad
+    # network on every launch; the SDK object is still created above so
+    # nothing that reads _cb sees null.
     :try_end_1
     .catch Ljava/lang/Exception; {:try_start_1 .. :try_end_1} :catch_1
 

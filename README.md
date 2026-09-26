@@ -24,7 +24,7 @@ This fork is maintained by **Edward Yang** ([@edbuildingstuff](https://github.co
 
 The existing Android build is functional and playable:
 
-- The original `libZombieCafeAndroid.so` (~1.9 MB, `armeabi-v7a`) is left untouched on disk. At process startup, `LibZombieCafeExtension` is loaded alongside it and uses `mprotect` + memcpy to rewrite a handful of byte ranges — fixing a texture destructor crash, redirecting the game's hardcoded server URLs to `zc.airyz.xyz`, swapping the "money buy" button to "toxin buy," and patching the version string.
+- The original `libZombieCafeAndroid.so` (~1.9 MB, `armeabi-v7a`) is left untouched on disk. At process startup, `LibZombieCafeExtension` is loaded alongside it and uses `mprotect` + memcpy to rewrite a handful of byte ranges — fixing a texture destructor crash, pointing the game's hardcoded server URLs at loopback (the APK is fully offline, see [Offline mode](#offline-mode)), swapping the "money buy" button to "toxin buy," and patching the version string.
 - A Go workspace under [`tool/`](tool/) contains five packages: `build_tool` (orchestrates the APK rebuild), `file_types` (binary format definitions for save games, cafes, characters, food, furniture, animations), `cctpacker` (CCTX texture codec), `resource_manager` (JSON ↔ binary round-tripping + atlas packing), and `server` (Cloudflare Workers backend).
 - The APK is repackaged with `apktool`, signed with the bundled `debug.keystore`, and installed on device.
 
@@ -34,7 +34,18 @@ The existing Android build is functional and playable:
 - Texture destructors are NOPed out to avoid the original crash, leaking a small amount of memory per unload.
 - The engine hardcodes 2 character sheets, which blocks backporting the full Japanese character roster.
 - The animation format has been decoded but is not yet re-packed by the tooling.
-- `/v1/zca/savegamestate.php` intentionally drops ~90% of writes as a cost-control measure.
+- The APK no longer talks to the Cloudflare Workers server (`tool/server`) at all; see [Offline mode](#offline-mode).
+
+## Offline mode
+
+The legacy APK needs no server, no account and no network:
+
+- **No backend.** Every request the native game makes (`CCUrlConnection::NewRequest`) is answered in-process by a small server written in Java ([`src/java`](src/java), compiled to smali under `src/smali/com/capcom/zombiecafeandroid/offline/`). Server time comes from the device clock, gift polls report nothing waiting, and save uploads are archived locally.
+- **Attacking other cafés works offline.** "Visit a random café" and friends' cafés are generated on the device from the café layouts it knows (a bundled template, snapshots of your own earlier café, and any `ServerData.dat` you drop into `Android/data/com.capcom.zombiecafeandroid/files/cafes/`). Each rival's defenders are sized against your account's strength — your zombies' types, levels and the game's own speed/attack/energy stats — at an easy, even or hard tier, and never above levels your own save proves valid. Tune with `rival.difficulty=1.0` in `files/offline.properties`.
+- **Friends.** A local profile is logged in automatically and eight neighbor rivals fill the friends list, so friend cafés and the map work without Facebook.
+- **IAP is auto-accepted.** Every toxin purchase completes locally through the game's own success callback, the HUD toxin icon opens the store again, and the "frequent purchase" throttle is off.
+
+Design, the recovered request/response protocol and the verification done so far: [`docs/superpowers/specs/2026-09-26-offline-mode-design.md`](docs/superpowers/specs/2026-09-26-offline-mode-design.md). Logs: `adb logcat -s ZCOffline`.
 
 ## Direction: Godot 4 cross-platform client
 
@@ -52,6 +63,7 @@ Full reasoning, trade-offs, phased plan, and validation strategy live in [`docs/
 - [`docs/rewrite-plan.md`](docs/rewrite-plan.md) — the Godot rewrite plan: goals, scope, phases, validation harness, and the decision log for why this path over the alternatives.
 - [`docs/devlog/`](docs/devlog/) — dated development journal entries. Written as the work happens, intended as source material for future blog posts and write-ups.
 - [`src/lib/cpp/README.md`](src/lib/cpp/README.md) — build commands for the legacy `LibZombieCafeExtension` runtime patcher.
+- [`docs/superpowers/specs/2026-09-26-offline-mode-design.md`](docs/superpowers/specs/2026-09-26-offline-mode-design.md) — offline mode: the client/server protocol, the in-process server, rival generation and the IAP path.
 - [`tool/cctpacker/readme.md`](tool/cctpacker/readme.md), [`tool/resource_manager/README.md`](tool/resource_manager/README.md) — notes on the Go tools.
 
 ## Building the legacy Android APK
@@ -68,7 +80,15 @@ cmake ../ -DCMAKE_TOOLCHAIN_FILE=$NDK_HOME/build/cmake/android.toolchain.cmake -
 make
 ```
 
-### 2. Run the Go build tool, assemble, sign, install
+### 2. (Only after editing `src/java`) Regenerate the offline-mode smali
+
+```bash
+src/java/build.sh --test
+```
+
+Compiles the offline server, converts it to smali under `src/smali/com/capcom/zombiecafeandroid/offline/` and runs its host tests plus the Go interop test. Needs a JDK and curl; the dex/smali tool jars are fetched from Maven Central with pinned checksums. New classes must also be added to `tool/build_tool/copylist/copy_files.go` (`go test -count=1 ./tool/build_tool/...` fails until they are).
+
+### 3. Run the Go build tool, assemble, sign, install
 
 ```bash
 go run ./tool/build_tool/ -i src/ -o build/

@@ -422,43 +422,22 @@
 .end method
 
 .method public onCreate(Landroid/os/Bundle;)V
-    .locals 2
+    .locals 1
 
     invoke-super {p0, p1}, Landroid/app/Activity;->onCreate(Landroid/os/Bundle;)V
 
-    const-string v0, "SmurfsBilling bypass"
-
-    const-string v1, "onCreate - faking purchase success"
-
-    invoke-static {v0, v1}, Landroid/util/Log;->d(Ljava/lang/String;Ljava/lang/String;)I
-
+    # IAP bypass: every purchase succeeds locally, with no Google Play or
+    # server round trip. OfflineStore reads the product from ItemName0 (or the
+    # slot BuyToxin recorded) and credits it through the game's own success
+    # callback, ZombieCafeAndroid.boughtToxin -> PurchaseAndroidToxin. The
+    # Activity still opens and finishes so the native shop sees the
+    # onPause/onResume cycle that clears its "purchase in progress" state.
     invoke-virtual {p0}, Lcom/capcom/billing/SmurfsBilling;->getIntent()Landroid/content/Intent;
 
     move-result-object v0
 
-    if-eqz v0, :cond_0
+    invoke-static {v0}, Lcom/capcom/zombiecafeandroid/offline/OfflineStore;->completePurchase(Landroid/content/Intent;)V
 
-    invoke-virtual {v0}, Landroid/content/Intent;->getExtras()Landroid/os/Bundle;
-
-    move-result-object v0
-
-    if-eqz v0, :cond_0
-
-    const-string v1, "ItemName0"
-
-    invoke-virtual {v0, v1}, Landroid/os/Bundle;->getString(Ljava/lang/String;)Ljava/lang/String;
-
-    move-result-object v0
-
-    if-eqz v0, :cond_0
-
-    const-string v1, "SmurfsBilling bypass"
-
-    invoke-static {v1, v0}, Landroid/util/Log;->d(Ljava/lang/String;Ljava/lang/String;)I
-
-    invoke-static {v0}, Lcom/capcom/zombiecafeandroid/ZombieCafeAndroid;->boughtToxin(Ljava/lang/String;)V
-
-    :cond_0
     invoke-virtual {p0}, Lcom/capcom/billing/SmurfsBilling;->finish()V
 
     return-void
