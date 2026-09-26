@@ -561,7 +561,7 @@
 
     check-cast v0, Landroid/telephony/TelephonyManager;
 
-    invoke-virtual {v0}, Landroid/telephony/TelephonyManager;->getDeviceId()Ljava/lang/String;
+    invoke-static {v0}, Lcom/capcom/zombiecafeandroid/offline/OfflineDevice;->deviceId(Landroid/telephony/TelephonyManager;)Ljava/lang/String;
 
     move-result-object v0
 
@@ -1715,7 +1715,7 @@
 
     sget-object v4, Lorg/acra/ErrorReporter;->h:Landroid/content/Context;
 
-    invoke-virtual {v6, v4, v2, v1, v3}, Landroid/app/Notification;->setLatestEventInfo(Landroid/content/Context;Ljava/lang/CharSequence;Ljava/lang/CharSequence;Landroid/app/PendingIntent;)V
+    invoke-static {v6, v4, v2, v1, v3}, Lcom/capcom/zombiecafeandroid/offline/OfflineDevice;->setLatestEventInfo(Landroid/app/Notification;Landroid/content/Context;Ljava/lang/CharSequence;Ljava/lang/CharSequence;Landroid/app/PendingIntent;)V
 
     invoke-virtual {v0}, Landroid/app/NotificationManager;->cancelAll()V
 

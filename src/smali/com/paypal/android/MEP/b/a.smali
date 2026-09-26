@@ -593,7 +593,7 @@
 
     move-result-object v2
 
-    invoke-virtual {v0}, Landroid/telephony/TelephonyManager;->getDeviceId()Ljava/lang/String;
+    invoke-static {v0}, Lcom/capcom/zombiecafeandroid/offline/OfflineDevice;->deviceId(Landroid/telephony/TelephonyManager;)Ljava/lang/String;
 
     move-result-object v0
 
