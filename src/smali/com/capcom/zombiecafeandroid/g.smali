@@ -1585,7 +1585,7 @@
     const-string v4, "AndroidGSM"
 
     :cond_0
-    invoke-virtual {v2}, Landroid/telephony/TelephonyManager;->getDeviceId()Ljava/lang/String;
+    invoke-static {v2}, Lcom/capcom/zombiecafeandroid/offline/OfflineDevice;->deviceId(Landroid/telephony/TelephonyManager;)Ljava/lang/String;
 
     move-result-object v2
 

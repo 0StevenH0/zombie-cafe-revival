@@ -704,7 +704,7 @@
 
     invoke-direct {v2}, Ljava/lang/StringBuilder;-><init>()V
 
-    invoke-virtual {v0}, Landroid/telephony/TelephonyManager;->getDeviceId()Ljava/lang/String;
+    invoke-static {v0}, Lcom/capcom/zombiecafeandroid/offline/OfflineDevice;->deviceId(Landroid/telephony/TelephonyManager;)Ljava/lang/String;
 
     move-result-object v3
 
@@ -720,7 +720,7 @@
 
     invoke-direct {v3}, Ljava/lang/StringBuilder;-><init>()V
 
-    invoke-virtual {v0}, Landroid/telephony/TelephonyManager;->getSimSerialNumber()Ljava/lang/String;
+    invoke-static {v0}, Lcom/capcom/zombiecafeandroid/offline/OfflineDevice;->simSerialNumber(Landroid/telephony/TelephonyManager;)Ljava/lang/String;
 
     move-result-object v0
 

@@ -400,7 +400,7 @@
 
     const-string v1, "imei"
 
-    invoke-virtual {v0}, Landroid/telephony/TelephonyManager;->getDeviceId()Ljava/lang/String;
+    invoke-static {v0}, Lcom/capcom/zombiecafeandroid/offline/OfflineDevice;->deviceId(Landroid/telephony/TelephonyManager;)Ljava/lang/String;
 
     move-result-object v2
 
@@ -481,7 +481,7 @@
 
     :cond_3
     :try_start_2
-    invoke-virtual {v0}, Landroid/telephony/TelephonyManager;->getDeviceId()Ljava/lang/String;
+    invoke-static {v0}, Lcom/capcom/zombiecafeandroid/offline/OfflineDevice;->deviceId(Landroid/telephony/TelephonyManager;)Ljava/lang/String;
     :try_end_2
     .catch Ljava/lang/Exception; {:try_start_2 .. :try_end_2} :catch_1
 

@@ -560,6 +560,7 @@ func GetCopyFiles() []string {
 		"smali/com/capcom/zombiecafeandroid/offline/CharacterCatalog.smali",
 		"smali/com/capcom/zombiecafeandroid/offline/CharacterRecord.smali",
 		"smali/com/capcom/zombiecafeandroid/offline/FriendCafe.smali",
+		"smali/com/capcom/zombiecafeandroid/offline/OfflineDevice.smali",
 		"smali/com/capcom/zombiecafeandroid/offline/OfflineFacebook.smali",
 		"smali/com/capcom/zombiecafeandroid/offline/OfflineLog.smali",
 		"smali/com/capcom/zombiecafeandroid/offline/OfflineRouter$Backend.smali",

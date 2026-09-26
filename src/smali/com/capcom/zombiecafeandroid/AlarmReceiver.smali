@@ -170,7 +170,7 @@
 
     iput v3, v6, Landroid/app/Notification;->flags:I
 
-    invoke-virtual {v6, p1, v0, v1, v5}, Landroid/app/Notification;->setLatestEventInfo(Landroid/content/Context;Ljava/lang/CharSequence;Ljava/lang/CharSequence;Landroid/app/PendingIntent;)V
+    invoke-static {v6, p1, v0, v1, v5}, Lcom/capcom/zombiecafeandroid/offline/OfflineDevice;->setLatestEventInfo(Landroid/app/Notification;Landroid/content/Context;Ljava/lang/CharSequence;Ljava/lang/CharSequence;Landroid/app/PendingIntent;)V
 
     const-string v0, "notification"
 

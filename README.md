@@ -4,6 +4,15 @@
 
 An ongoing effort to reverse engineer, preserve, and revive the 2011 Capcom mobile game *Zombie Cafe* — replacing the shut-down online services, fixing long-standing crashes, and eventually rebuilding the client as a cross-platform game in **Godot 4**.
 
+## Download
+
+Offline builds of the original game, which need no server, account or network ([Offline mode](#offline-mode)):
+
+- **[ZombieCafeOffline-arm64.apk](https://github.com/0StevenH0/zombie-cafe-revival/raw/apk-builds/ZombieCafeOffline-arm64.apk)**: for phones that cannot run 32-bit apps (Pixel 7 and later, POCO X7 Pro, most phones from 2024 on) and for Android 14 and 15. It runs the original engine on a built-in ARM32 emulator ([64-bit-only phones](#64-bit-only-phones)). New and not yet tested on a phone.
+- **[ZombieCafeOffline.apk](https://github.com/0StevenH0/zombie-cafe-revival/raw/apk-builds/ZombieCafeOffline.apk)**: the engine running natively, for phones that can still run 32-bit apps. Android 14 and later refuse to install it from the phone; use `adb install --bypass-low-target-sdk-block ZombieCafeOffline.apk`.
+
+Both use the same package name and signing key, so installing one over the other keeps your save. Checksums and install notes are on the [`apk-builds`](https://github.com/0StevenH0/zombie-cafe-revival/tree/apk-builds) branch.
+
 ## Heritage
 
 This repository began as the work of [**Airyz**](https://airyz.xyz/), who did the original reverse engineering: decoding the proprietary file formats (save games, character data, the `CCTX` texture format), authoring the `LibZombieCafeExtension` runtime patcher that rewrites `libZombieCafeAndroid.so` in memory at load time, and standing up a Cloudflare Workers backend that emulates Capcom's retired `/v1/zca/*` endpoints. Airyz's write-up is the single best primer on the project's technical foundations:
@@ -30,7 +39,7 @@ The existing Android build is functional and playable:
 
 **Known limitations inherited from this approach** (all documented in [`docs/rewrite-plan.md`](docs/rewrite-plan.md)):
 
-- ARMv7 32-bit only — no iOS, desktop, or web.
+- Android only — no iOS, desktop, or web. Phones without 32-bit support run the engine in an ARM32 emulator (see [64-bit-only phones](#64-bit-only-phones)).
 - Texture destructors are NOPed out to avoid the original crash, leaking a small amount of memory per unload.
 - The engine hardcodes 2 character sheets, which blocks backporting the full Japanese character roster.
 - The animation format has been decoded but is not yet re-packed by the tooling.
@@ -46,6 +55,14 @@ The legacy APK needs no server, no account and no network:
 - **IAP is auto-accepted.** Every toxin purchase completes locally through the game's own success callback, the HUD toxin icon opens the store again, and the "frequent purchase" throttle is off.
 
 Design, the recovered request/response protocol and the verification done so far: [`docs/superpowers/specs/2026-09-26-offline-mode-design.md`](docs/superpowers/specs/2026-09-26-offline-mode-design.md). Logs: `adb logcat -s ZCOffline`.
+
+## 64-bit-only phones
+
+Many phones sold since 2023 cannot run 32-bit code at all. Their CPU cores have no 32-bit mode (Cortex-A715 and later, Cortex-X2 and later, Snapdragon 8 Elite), or the system ships without 32-bit support (Pixel 7 and later). The game's engine, `libZombieCafeAndroid.so`, is a closed 32-bit ARM binary, so the classic APK cannot be installed on these phones.
+
+The arm64 APK ships its own 64-bit `libZombieCafeAndroid.so` ([`src/lib/arm32emu`](src/lib/arm32emu/README.md)). It carries the unmodified engine and runs it on an ARM32 interpreter, passing the engine's calls into libc, zlib, OpenGL ES and JNI through to the phone. The `LibZombieCafeExtension` patcher runs inside the emulator exactly as it runs natively. The APK targets Android 7 (API 24), so Android 14 and 15 install it normally. The calls that fail for an app targeting Android 7 (reading the device ID, and a notification method removed in Android 6) go through `offline/OfflineDevice`.
+
+It has been verified on a build machine: the interpreter matches Unicorn on 280,000 random instructions, and the real engine boots through the menus into the café tutorial in a desktop test harness. It has not run on a phone yet; `adb logcat -s ZCArm32 ZCOffline` shows what went wrong if it misbehaves. Design and verification: [`docs/superpowers/specs/2026-09-26-arm64-runtime-design.md`](docs/superpowers/specs/2026-09-26-arm64-runtime-design.md).
 
 ## Direction: Godot 4 cross-platform client
 
@@ -64,11 +81,20 @@ Full reasoning, trade-offs, phased plan, and validation strategy live in [`docs/
 - [`docs/devlog/`](docs/devlog/) — dated development journal entries. Written as the work happens, intended as source material for future blog posts and write-ups.
 - [`src/lib/cpp/README.md`](src/lib/cpp/README.md) — build commands for the legacy `LibZombieCafeExtension` runtime patcher.
 - [`docs/superpowers/specs/2026-09-26-offline-mode-design.md`](docs/superpowers/specs/2026-09-26-offline-mode-design.md) — offline mode: the client/server protocol, the in-process server, rival generation and the IAP path.
+- [`docs/superpowers/specs/2026-09-26-arm64-runtime-design.md`](docs/superpowers/specs/2026-09-26-arm64-runtime-design.md) and [`src/lib/arm32emu/README.md`](src/lib/arm32emu/README.md) — the ARM32 runtime behind the arm64 APK: design, file map, tests, and an on-device checklist.
 - [`tool/cctpacker/readme.md`](tool/cctpacker/readme.md), [`tool/resource_manager/README.md`](tool/resource_manager/README.md) — notes on the Go tools.
 
 ## Building the legacy Android APK
 
-These instructions still work and are the reference path until the Godot client lands. They assume `cmake`, `make`, `go`, `apktool`, `jarsigner`, and the Android NDK are installed and on `PATH`.
+The quick way builds both APKs without the Android NDK. It needs `go`, a JDK, `clang` and `ld.lld` (LLVM 15 or later), and apktool:
+
+```bash
+APKTOOL=/path/to/apktool.jar tool/build_apks.sh
+```
+
+It writes `build/out/ZombieCafeOffline.apk` (native 32-bit engine) and `build/out/ZombieCafeOffline-arm64.apk` (the engine in the ARM32 runtime), both signed with `debug.keystore`. After editing `src/java`, run step 2 below first.
+
+The manual steps below still work and build the 32-bit APK. They assume `cmake`, `make`, `go`, `apktool`, `jarsigner`, and the Android NDK are installed and on `PATH`.
 
 ### 1. Build `LibZombieCafeExtension`
 

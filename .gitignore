@@ -11,3 +11,4 @@ tool/dump_legacy_fixtures/dump_legacy_fixtures.exe
 
 # offline-mode Java build tools (fetched by src/java/build.sh)
 src/java/.tools/
+src/lib/arm32emu/out/
